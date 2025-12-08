@@ -1,0 +1,21 @@
+{
+  "name": "@lucian/runes",
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "pnpm@10.25.0",
+  "exports": {
+    ".": {
+      "import": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "link:global": "pnpm build && pnpm link --global"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
