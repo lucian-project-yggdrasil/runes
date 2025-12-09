@@ -8,9 +8,17 @@
 			"types": "./dist/core/index.d.ts",
 			"import": "./dist/core/index.js",
 			"require": "./dist/core/index.cjs"
+		},
+		"./social": {
+			"types": "./dist/social/index.d.ts",
+			"import": "./dist/social/index.js",
+			"require": "./dist/social/index.cjs"
 		}
 	},
-	"files": ["dist", "biome.json"],
+	"files": [
+		"dist",
+		"biome.json"
+	],
 	"scripts": {
 		"build": "tsup",
 		"dev": "tsup --watch",
@@ -21,11 +29,13 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
+		"@types/luxon": "^3.7.1",
 		"tsup": "^8.5.1",
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@azure/cosmos": "^4.9.0",
+		"luxon": "^3.7.2",
 		"zod": "^4.1.13"
 	}
 }
