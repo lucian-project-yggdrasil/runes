@@ -5,14 +5,12 @@
 	"packageManager": "pnpm@10.25.0",
 	"exports": {
 		".": {
+			"types": "./dist/core/index.d.ts",
 			"import": "./dist/core/index.js",
-			"types": "./dist/core/index.d.ts"
+			"require": "./dist/core/index.cjs"
 		}
 	},
-	"files": [
-		"dist",
-		"biome.json"
-	],
+	"files": ["dist", "biome.json"],
 	"scripts": {
 		"build": "tsup",
 		"dev": "tsup --watch",

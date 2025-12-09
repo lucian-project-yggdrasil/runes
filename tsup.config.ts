@@ -4,7 +4,7 @@ export default defineConfig({
 	entry: {
 		"core/index": "src/core/index.ts",
 	},
-	format: ["esm"],
+	format: ["esm", "cjs"],
 	dts: true,
 	splitting: false,
 	sourcemap: true,
