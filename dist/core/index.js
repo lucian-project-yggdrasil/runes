@@ -11,7 +11,11 @@ var BaseRepository = class {
     if (!this.container) {
       const client = new CosmosClient(this.connectionString);
       const db = client.database(this.databaseName);
-      this.container = db.container(this.containerName);
+      const { container } = await db.containers.createIfNotExists({
+        id: this.containerName,
+        partitionKey: "/tenantId"
+      });
+      this.container = container;
     }
     return this.container;
   }
