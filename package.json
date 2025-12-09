@@ -9,7 +9,10 @@
 			"types": "./dist/core/index.d.ts"
 		}
 	},
-	"files": ["dist", "biome.json"],
+	"files": [
+		"dist",
+		"biome.json"
+	],
 	"scripts": {
 		"build": "tsup",
 		"dev": "tsup --watch",
@@ -22,5 +25,9 @@
 		"@biomejs/biome": "^2.3.8",
 		"tsup": "^8.5.1",
 		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@azure/cosmos": "^4.9.0",
+		"zod": "^4.1.13"
 	}
 }
