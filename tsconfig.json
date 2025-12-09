@@ -1,18 +1,17 @@
 {
-  "compilerOptions": {
-    /* Base Options */
-    "module": "ESNext",
-    "target": "ES2022",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "outDir": "dist"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"module": "ESNext",
+		"target": "ES2022",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"declaration": true,
+		"outDir": "dist"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "dist"]
 }
