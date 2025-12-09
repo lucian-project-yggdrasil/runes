@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { C as CosmosRepository } from '../repository-D9FUt04Y.js';
+import '@azure/cosmos';
 
 declare const FrequencySchema: z.ZodEnum<{
     weekly: "weekly";
@@ -24,9 +26,10 @@ declare const InteractionSchema: z.ZodObject<{
         email: "email";
     }>;
     notes: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
+}, z.core.$strict>;
 declare const FriendSchema: z.ZodObject<{
-    id: z.ZodOptional<z.ZodUUID>;
+    id: z.ZodUUID;
+    tenantId: z.ZodString;
     name: z.ZodString;
     email: z.ZodOptional<z.ZodEmail>;
     avatarUrl: z.ZodOptional<z.ZodURL>;
@@ -56,8 +59,8 @@ declare const FriendSchema: z.ZodObject<{
             email: "email";
         }>;
         notes: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>>;
-}, z.core.$strip>;
+    }, z.core.$strict>>>;
+}, z.core.$strict>;
 type Frequency = z.infer<typeof FrequencySchema>;
 type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
 type Interaction = z.infer<typeof InteractionSchema>;
@@ -68,4 +71,9 @@ type Friend = z.infer<typeof FriendSchema>;
  */
 declare const getRelationshipStatus: (friend: Friend) => RelationshipStatus;
 
-export { type Frequency, FrequencySchema, type Friend, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, getRelationshipStatus };
+declare class FriendRepository extends CosmosRepository<Friend> {
+    constructor();
+    findByEmail(tenantId: string, email: string): Promise<Friend | null>;
+}
+
+export { type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, getRelationshipStatus };

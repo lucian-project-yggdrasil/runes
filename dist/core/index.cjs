@@ -20,27 +20,84 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/core/index.ts
 var core_exports = {};
 __export(core_exports, {
-  BaseRepository: () => BaseRepository,
-  CreateFriendSchema: () => CreateFriendSchema,
-  FriendSchema: () => FriendSchema,
+  CosmosRepository: () => CosmosRepository,
+  Logger: () => Logger,
+  getCosmosClient: () => getCosmosClient,
   greet: () => greet
 });
 module.exports = __toCommonJS(core_exports);
 
-// src/core/database/repository.ts
+// src/core/cosmos/client.ts
 var import_cosmos = require("@azure/cosmos");
-var BaseRepository = class {
-  constructor(connectionString, databaseName, containerName) {
-    this.connectionString = connectionString;
-    this.databaseName = databaseName;
+
+// src/core/logger/index.ts
+var RunesLogger = class {
+  isDev = process.env.NODE_ENV !== "production";
+  format(level, message, data) {
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+    if (this.isDev) {
+      const color = level === "error" ? "\x1B[31m" : level === "warn" ? "\x1B[33m" : "\x1B[36m";
+      const reset = "\x1B[0m";
+      console.log(`${color}[${level.toUpperCase()}]${reset} ${message}`);
+      if (data) console.dir(data, { depth: null, colors: true });
+    } else {
+      console.log(
+        JSON.stringify({
+          timestamp,
+          level,
+          message,
+          data,
+          app: process.env.WEBSITE_SITE_NAME || "Local"
+        })
+      );
+    }
+  }
+  info(message, data) {
+    this.format("info", message, data);
+  }
+  error(message, data) {
+    this.format("error", message, data);
+  }
+  warn(message, data) {
+    this.format("warn", message, data);
+  }
+  debug(message, data) {
+    this.format("debug", message, data);
+  }
+};
+var Logger = new RunesLogger();
+
+// src/core/cosmos/client.ts
+var clientInstance = null;
+var getCosmosClient = () => {
+  if (clientInstance) {
+    return clientInstance;
+  }
+  const connectionString = process.env.COSMOS_CONNECTION_STRING;
+  if (!connectionString) {
+    Logger.error("CRITICAL: COSMOS_CONNECTION_STRING is missing from environment variables.");
+    throw new Error("COSMOS_CONNECTION_STRING is missing.");
+  }
+  Logger.info("\u26A1 Initializing new Cosmos Client Connection...");
+  clientInstance = new import_cosmos.CosmosClient(connectionString);
+  return clientInstance;
+};
+
+// src/core/cosmos/repository.ts
+var CosmosRepository = class {
+  constructor(containerName) {
     this.containerName = containerName;
   }
   container = null;
+  /**
+   * Lazy-loads the container.
+   * Ensures we reuse the Single Connection from 'client.ts'.
+   */
   async getContainer() {
     if (!this.container) {
-      const client = new import_cosmos.CosmosClient(this.connectionString);
-      const db = client.database(this.databaseName);
-      const { container } = await db.containers.createIfNotExists({
+      const client = getCosmosClient();
+      const database = client.database("yggdrasil-data");
+      const { container } = await database.containers.createIfNotExists({
         id: this.containerName,
         partitionKey: "/tenantId"
       });
@@ -48,41 +105,56 @@ var BaseRepository = class {
     }
     return this.container;
   }
-  // Generic Query: Automatically enforces Tenant Isolation
-  async findByTenant(tenantId, querySpec) {
-    const container = await this.getContainer();
-    const query = querySpec ? `${querySpec} AND c.tenantId = @tenantId` : `SELECT * FROM c WHERE c.tenantId = @tenantId`;
-    const { resources } = await container.items.query({
-      query,
-      parameters: [{ name: "@tenantId", value: tenantId }]
-    }).fetchAll();
-    return resources;
-  }
   async create(item) {
     const container = await this.getContainer();
+    Logger.info(`[Cosmos] Creating item in ${this.containerName}`, { id: item.id });
     const { resource } = await container.items.create(item);
     return resource;
   }
+  async get(id, tenantId) {
+    const container = await this.getContainer();
+    try {
+      const { resource } = await container.item(id, tenantId).read();
+      return resource || null;
+    } catch (error) {
+      const cosmosError = error;
+      if (cosmosError.code === 404) return null;
+      throw error;
+    }
+  }
+  async fetchAll(tenantId) {
+    const container = await this.getContainer();
+    const querySpec = {
+      query: "SELECT * FROM c WHERE c.tenantId = @tenantId",
+      parameters: [{ name: "@tenantId", value: tenantId }]
+    };
+    const { resources } = await container.items.query(querySpec).fetchAll();
+    return resources;
+  }
+  async update(item) {
+    const container = await this.getContainer();
+    const { resource } = await container.items.upsert(item);
+    return resource;
+  }
+  async delete(id, tenantId) {
+    const container = await this.getContainer();
+    await container.item(id, tenantId).delete();
+  }
+  /**
+   * Custom Query
+   * Allows specific WHERE clauses, but forces Tenant ID injection.
+   */
+  async query(tenantId, query, parameters = []) {
+    const container = await this.getContainer();
+    const safeQuery = `${query} AND c.tenantId = @tenantId`;
+    const querySpec = {
+      query: safeQuery,
+      parameters: [...parameters, { name: "@tenantId", value: tenantId }]
+    };
+    const { resources } = await container.items.query(querySpec).fetchAll();
+    return resources;
+  }
 };
-
-// src/core/domains/friend/index.ts
-var import_zod = require("zod");
-var FriendSchema = import_zod.z.object({
-  id: import_zod.z.uuid(),
-  tenantId: import_zod.z.string(),
-  name: import_zod.z.string().min(1, "Name is required"),
-  status: import_zod.z.enum(["Cold", "Warm", "Hot"]),
-  createdAt: import_zod.z.iso.datetime(),
-  email: import_zod.z.email().optional(),
-  location: import_zod.z.string().optional()
-});
-var CreateFriendSchema = FriendSchema.pick({
-  name: true,
-  email: true,
-  location: true
-}).extend({
-  status: import_zod.z.enum(["Cold", "Warm", "Hot"]).default("Warm")
-});
 
 // src/core/index.ts
 var greet = (name) => {
@@ -90,9 +162,9 @@ var greet = (name) => {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  BaseRepository,
-  CreateFriendSchema,
-  FriendSchema,
+  CosmosRepository,
+  Logger,
+  getCosmosClient,
   greet
 });
 //# sourceMappingURL=index.cjs.map

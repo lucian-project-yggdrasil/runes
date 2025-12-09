@@ -1,2 +1,3 @@
-export * from "./logic.js"
-export * from "./schemas.js"
+export * from "./logic"
+export * from "./repository"
+export * from "./schemas"
