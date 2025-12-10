@@ -26,6 +26,8 @@ __export(social_exports, {
   FriendSchema: () => FriendSchema,
   InteractionSchema: () => InteractionSchema,
   RelationshipStatusSchema: () => RelationshipStatusSchema,
+  TierSchema: () => TierSchema,
+  UpdateFriendSchema: () => UpdateFriendSchema,
   getRelationshipStatus: () => getRelationshipStatus
 });
 module.exports = __toCommonJS(social_exports);
@@ -202,6 +204,7 @@ var FriendRepository = class extends CosmosRepository {
 
 // src/social/schemas.ts
 var import_zod = require("zod");
+var TierSchema = import_zod.z.enum(["inner", "outer", "network"]);
 var FrequencySchema = import_zod.z.enum([
   "weekly",
   // 7 days (Inner Circle)
@@ -214,7 +217,6 @@ var FrequencySchema = import_zod.z.enum([
   "ad-hoc"
   // No pressure (Coworkers)
 ]);
-var RelationshipStatusSchema = import_zod.z.enum(["healthy", "decaying", "critical", "unknown"]);
 var InteractionSchema = import_zod.z.strictObject({
   id: import_zod.z.uuid(),
   date: import_zod.z.iso.datetime(),
@@ -222,6 +224,7 @@ var InteractionSchema = import_zod.z.strictObject({
   type: import_zod.z.enum(["call", "text", "meet", "social", "email"]),
   notes: import_zod.z.string().optional()
 });
+var RelationshipStatusSchema = import_zod.z.enum(["healthy", "decaying", "critical", "unknown"]);
 var FriendSchema = import_zod.z.strictObject({
   // Infrastructure
   id: import_zod.z.uuid(),
@@ -235,21 +238,24 @@ var FriendSchema = import_zod.z.strictObject({
   email: import_zod.z.email().optional(),
   avatarUrl: import_zod.z.url().optional(),
   // The Engine (Decay Algorithm)
-  tier: import_zod.z.enum(["inner", "outer", "network"]).default("network"),
+  tier: TierSchema.default("network"),
   targetFrequency: FrequencySchema.default("monthly"),
   lastContactedAt: import_zod.z.iso.datetime().optional(),
   // Context
   birthday: import_zod.z.string().regex(/^\d{2}-\d{2}$/, "Format MM-DD").optional(),
   tags: import_zod.z.array(import_zod.z.string()).default([]),
+  facts: import_zod.z.array(import_zod.z.string()).default([]),
   interactions: import_zod.z.array(InteractionSchema).default([])
 });
 var CreateFriendSchema = FriendSchema.omit({
+  // Blacklisted props
   id: true,
   tenantId: true,
   createdAt: true,
   updatedAt: true,
   interactions: true
 });
+var UpdateFriendSchema = CreateFriendSchema.partial();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CreateFriendSchema,
@@ -258,6 +264,8 @@ var CreateFriendSchema = FriendSchema.omit({
   FriendSchema,
   InteractionSchema,
   RelationshipStatusSchema,
+  TierSchema,
+  UpdateFriendSchema,
   getRelationshipStatus
 });
 //# sourceMappingURL=index.cjs.map

@@ -2,18 +2,17 @@ import { z } from 'zod';
 import { C as CosmosRepository } from '../repository-D9FUt04Y.cjs';
 import '@azure/cosmos';
 
+declare const TierSchema: z.ZodEnum<{
+    inner: "inner";
+    outer: "outer";
+    network: "network";
+}>;
 declare const FrequencySchema: z.ZodEnum<{
     weekly: "weekly";
     monthly: "monthly";
     quarterly: "quarterly";
     yearly: "yearly";
     "ad-hoc": "ad-hoc";
-}>;
-declare const RelationshipStatusSchema: z.ZodEnum<{
-    healthy: "healthy";
-    decaying: "decaying";
-    critical: "critical";
-    unknown: "unknown";
 }>;
 declare const InteractionSchema: z.ZodObject<{
     id: z.ZodUUID;
@@ -27,6 +26,12 @@ declare const InteractionSchema: z.ZodObject<{
     }>;
     notes: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;
+declare const RelationshipStatusSchema: z.ZodEnum<{
+    healthy: "healthy";
+    decaying: "decaying";
+    critical: "critical";
+    unknown: "unknown";
+}>;
 declare const FriendSchema: z.ZodObject<{
     id: z.ZodUUID;
     tenantId: z.ZodString;
@@ -50,6 +55,7 @@ declare const FriendSchema: z.ZodObject<{
     lastContactedAt: z.ZodOptional<z.ZodISODateTime>;
     birthday: z.ZodOptional<z.ZodString>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    facts: z.ZodDefault<z.ZodArray<z.ZodString>>;
     interactions: z.ZodDefault<z.ZodArray<z.ZodObject<{
         id: z.ZodUUID;
         date: z.ZodISODateTime;
@@ -82,12 +88,35 @@ declare const CreateFriendSchema: z.ZodObject<{
     lastContactedAt: z.ZodOptional<z.ZodISODateTime>;
     birthday: z.ZodOptional<z.ZodString>;
     tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    facts: z.ZodDefault<z.ZodArray<z.ZodString>>;
+}, z.core.$strict>;
+declare const UpdateFriendSchema: z.ZodObject<{
+    email: z.ZodOptional<z.ZodOptional<z.ZodEmail>>;
+    name: z.ZodOptional<z.ZodString>;
+    avatarUrl: z.ZodOptional<z.ZodOptional<z.ZodURL>>;
+    tier: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        inner: "inner";
+        outer: "outer";
+        network: "network";
+    }>>>;
+    targetFrequency: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        weekly: "weekly";
+        monthly: "monthly";
+        quarterly: "quarterly";
+        yearly: "yearly";
+        "ad-hoc": "ad-hoc";
+    }>>>;
+    lastContactedAt: z.ZodOptional<z.ZodOptional<z.ZodISODateTime>>;
+    birthday: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    tags: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    facts: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
 }, z.core.$strict>;
 type Frequency = z.infer<typeof FrequencySchema>;
 type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
 type Interaction = z.infer<typeof InteractionSchema>;
 type Friend = z.infer<typeof FriendSchema>;
 type CreateFriendDto = z.infer<typeof CreateFriendSchema>;
+type UpdateFriendDto = z.infer<typeof UpdateFriendSchema>;
 
 /**
  * Calculates the health of a relationship based on frequency targets.
@@ -99,4 +128,4 @@ declare class FriendRepository extends CosmosRepository<Friend> {
     findByEmail(tenantId: string, email: string): Promise<Friend | null>;
 }
 
-export { type CreateFriendDto, CreateFriendSchema, type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, getRelationshipStatus };
+export { type CreateFriendDto, CreateFriendSchema, type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, TierSchema, type UpdateFriendDto, UpdateFriendSchema, getRelationshipStatus };

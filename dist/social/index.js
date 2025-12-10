@@ -170,6 +170,7 @@ var FriendRepository = class extends CosmosRepository {
 
 // src/social/schemas.ts
 import { z } from "zod";
+var TierSchema = z.enum(["inner", "outer", "network"]);
 var FrequencySchema = z.enum([
   "weekly",
   // 7 days (Inner Circle)
@@ -182,7 +183,6 @@ var FrequencySchema = z.enum([
   "ad-hoc"
   // No pressure (Coworkers)
 ]);
-var RelationshipStatusSchema = z.enum(["healthy", "decaying", "critical", "unknown"]);
 var InteractionSchema = z.strictObject({
   id: z.uuid(),
   date: z.iso.datetime(),
@@ -190,6 +190,7 @@ var InteractionSchema = z.strictObject({
   type: z.enum(["call", "text", "meet", "social", "email"]),
   notes: z.string().optional()
 });
+var RelationshipStatusSchema = z.enum(["healthy", "decaying", "critical", "unknown"]);
 var FriendSchema = z.strictObject({
   // Infrastructure
   id: z.uuid(),
@@ -203,21 +204,24 @@ var FriendSchema = z.strictObject({
   email: z.email().optional(),
   avatarUrl: z.url().optional(),
   // The Engine (Decay Algorithm)
-  tier: z.enum(["inner", "outer", "network"]).default("network"),
+  tier: TierSchema.default("network"),
   targetFrequency: FrequencySchema.default("monthly"),
   lastContactedAt: z.iso.datetime().optional(),
   // Context
   birthday: z.string().regex(/^\d{2}-\d{2}$/, "Format MM-DD").optional(),
   tags: z.array(z.string()).default([]),
+  facts: z.array(z.string()).default([]),
   interactions: z.array(InteractionSchema).default([])
 });
 var CreateFriendSchema = FriendSchema.omit({
+  // Blacklisted props
   id: true,
   tenantId: true,
   createdAt: true,
   updatedAt: true,
   interactions: true
 });
+var UpdateFriendSchema = CreateFriendSchema.partial();
 export {
   CreateFriendSchema,
   FrequencySchema,
@@ -225,6 +229,8 @@ export {
   FriendSchema,
   InteractionSchema,
   RelationshipStatusSchema,
+  TierSchema,
+  UpdateFriendSchema,
   getRelationshipStatus
 };
 //# sourceMappingURL=index.js.map
