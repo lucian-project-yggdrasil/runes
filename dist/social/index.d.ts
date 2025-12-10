@@ -30,7 +30,7 @@ declare const InteractionSchema: z.ZodObject<{
 declare const FriendSchema: z.ZodObject<{
     id: z.ZodUUID;
     tenantId: z.ZodString;
-    createdAt: z.ZodOptional<z.ZodISODateTime>;
+    createdAt: z.ZodISODateTime;
     updatedAt: z.ZodOptional<z.ZodISODateTime>;
     name: z.ZodString;
     email: z.ZodOptional<z.ZodEmail>;
@@ -63,10 +63,31 @@ declare const FriendSchema: z.ZodObject<{
         notes: z.ZodOptional<z.ZodString>;
     }, z.core.$strict>>>;
 }, z.core.$strict>;
+declare const CreateFriendSchema: z.ZodObject<{
+    email: z.ZodOptional<z.ZodEmail>;
+    name: z.ZodString;
+    avatarUrl: z.ZodOptional<z.ZodURL>;
+    tier: z.ZodDefault<z.ZodEnum<{
+        inner: "inner";
+        outer: "outer";
+        network: "network";
+    }>>;
+    targetFrequency: z.ZodDefault<z.ZodEnum<{
+        weekly: "weekly";
+        monthly: "monthly";
+        quarterly: "quarterly";
+        yearly: "yearly";
+        "ad-hoc": "ad-hoc";
+    }>>;
+    lastContactedAt: z.ZodOptional<z.ZodISODateTime>;
+    birthday: z.ZodOptional<z.ZodString>;
+    tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+}, z.core.$strict>;
 type Frequency = z.infer<typeof FrequencySchema>;
 type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
 type Interaction = z.infer<typeof InteractionSchema>;
 type Friend = z.infer<typeof FriendSchema>;
+type CreateFriendDto = z.infer<typeof CreateFriendSchema>;
 
 /**
  * Calculates the health of a relationship based on frequency targets.
@@ -78,4 +99,4 @@ declare class FriendRepository extends CosmosRepository<Friend> {
     findByEmail(tenantId: string, email: string): Promise<Friend | null>;
 }
 
-export { type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, getRelationshipStatus };
+export { type CreateFriendDto, CreateFriendSchema, type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, getRelationshipStatus };

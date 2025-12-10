@@ -20,6 +20,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/social/index.ts
 var social_exports = {};
 __export(social_exports, {
+  CreateFriendSchema: () => CreateFriendSchema,
   FrequencySchema: () => FrequencySchema,
   FriendRepository: () => FriendRepository,
   FriendSchema: () => FriendSchema,
@@ -227,7 +228,7 @@ var FriendSchema = import_zod.z.strictObject({
   // UUID
   tenantId: import_zod.z.string().min(1, "Tenant ID is required"),
   // Partition Key
-  createdAt: import_zod.z.iso.datetime().optional(),
+  createdAt: import_zod.z.iso.datetime(),
   updatedAt: import_zod.z.iso.datetime().optional(),
   // Identity
   name: import_zod.z.string().min(1, "Name is required"),
@@ -242,8 +243,16 @@ var FriendSchema = import_zod.z.strictObject({
   tags: import_zod.z.array(import_zod.z.string()).default([]),
   interactions: import_zod.z.array(InteractionSchema).default([])
 });
+var CreateFriendSchema = FriendSchema.omit({
+  id: true,
+  tenantId: true,
+  createdAt: true,
+  updatedAt: true,
+  interactions: true
+});
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  CreateFriendSchema,
   FrequencySchema,
   FriendRepository,
   FriendSchema,

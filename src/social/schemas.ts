@@ -28,7 +28,7 @@ export const FriendSchema = z.strictObject({
 	// Infrastructure
 	id: z.uuid(), // UUID
 	tenantId: z.string().min(1, "Tenant ID is required"), // Partition Key
-	createdAt: z.iso.datetime().optional(),
+	createdAt: z.iso.datetime(),
 	updatedAt: z.iso.datetime().optional(),
 
 	// Identity
@@ -50,6 +50,14 @@ export const FriendSchema = z.strictObject({
 	interactions: z.array(InteractionSchema).default([]),
 })
 
+export const CreateFriendSchema = FriendSchema.omit({
+	id: true,
+	tenantId: true,
+	createdAt: true,
+	updatedAt: true,
+	interactions: true,
+})
+
 // ==========================================
 // 3. INFERRED TYPES
 // ==========================================
@@ -58,3 +66,4 @@ export type Frequency = z.infer<typeof FrequencySchema>
 export type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>
 export type Interaction = z.infer<typeof InteractionSchema>
 export type Friend = z.infer<typeof FriendSchema>
+export type CreateFriendDto = z.infer<typeof CreateFriendSchema>
