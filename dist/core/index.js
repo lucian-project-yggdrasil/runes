@@ -1,3 +1,10 @@
+// src/core/constants.ts
+var YGGDRASIL_DB = "yggdrasil-data";
+var CONTAINERS = {
+  USERS: "users",
+  FRIENDS: "friends"
+};
+
 // src/core/cosmos/client.ts
 import { CosmosClient } from "@azure/cosmos";
 
@@ -67,7 +74,7 @@ var CosmosRepository = class {
   async getContainer() {
     if (!this.container) {
       const client = getCosmosClient();
-      const database = client.database("yggdrasil-data");
+      const database = client.database(YGGDRASIL_DB);
       const { container } = await database.containers.createIfNotExists({
         id: this.containerName,
         partitionKey: "/tenantId"
@@ -132,8 +139,10 @@ var greet = (name) => {
   return `Sk\xE5l, ${name}! The Core Runes are active.`;
 };
 export {
+  CONTAINERS,
   CosmosRepository,
   Logger,
+  YGGDRASIL_DB,
   getCosmosClient,
   greet
 };

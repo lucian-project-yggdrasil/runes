@@ -30,6 +30,8 @@ declare const InteractionSchema: z.ZodObject<{
 declare const FriendSchema: z.ZodObject<{
     id: z.ZodUUID;
     tenantId: z.ZodString;
+    createdAt: z.ZodOptional<z.ZodISODateTime>;
+    updatedAt: z.ZodOptional<z.ZodISODateTime>;
     name: z.ZodString;
     email: z.ZodOptional<z.ZodEmail>;
     avatarUrl: z.ZodOptional<z.ZodURL>;

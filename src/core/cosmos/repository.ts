@@ -1,4 +1,5 @@
 import type { Container, JSONValue, SqlQuerySpec } from "@azure/cosmos"
+import { YGGDRASIL_DB } from "../constants"
 import { Logger } from "../logger"
 import { getCosmosClient } from "./client"
 
@@ -25,7 +26,7 @@ export abstract class CosmosRepository<T extends BaseEntity> {
 	protected async getContainer(): Promise<Container> {
 		if (!this.container) {
 			const client = getCosmosClient()
-			const database = client.database("yggdrasil-data")
+			const database = client.database(YGGDRASIL_DB)
 
 			// Auto-provision container if missing
 			const { container } = await database.containers.createIfNotExists({

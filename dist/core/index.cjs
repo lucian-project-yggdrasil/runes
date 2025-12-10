@@ -20,12 +20,21 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/core/index.ts
 var core_exports = {};
 __export(core_exports, {
+  CONTAINERS: () => CONTAINERS,
   CosmosRepository: () => CosmosRepository,
   Logger: () => Logger,
+  YGGDRASIL_DB: () => YGGDRASIL_DB,
   getCosmosClient: () => getCosmosClient,
   greet: () => greet
 });
 module.exports = __toCommonJS(core_exports);
+
+// src/core/constants.ts
+var YGGDRASIL_DB = "yggdrasil-data";
+var CONTAINERS = {
+  USERS: "users",
+  FRIENDS: "friends"
+};
 
 // src/core/cosmos/client.ts
 var import_cosmos = require("@azure/cosmos");
@@ -96,7 +105,7 @@ var CosmosRepository = class {
   async getContainer() {
     if (!this.container) {
       const client = getCosmosClient();
-      const database = client.database("yggdrasil-data");
+      const database = client.database(YGGDRASIL_DB);
       const { container } = await database.containers.createIfNotExists({
         id: this.containerName,
         partitionKey: "/tenantId"
@@ -162,8 +171,10 @@ var greet = (name) => {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  CONTAINERS,
   CosmosRepository,
   Logger,
+  YGGDRASIL_DB,
   getCosmosClient,
   greet
 });

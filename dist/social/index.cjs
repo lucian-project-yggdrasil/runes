@@ -50,6 +50,13 @@ var getRelationshipStatus = (friend) => {
   return "critical";
 };
 
+// src/core/constants.ts
+var YGGDRASIL_DB = "yggdrasil-data";
+var CONTAINERS = {
+  USERS: "users",
+  FRIENDS: "friends"
+};
+
 // src/core/cosmos/client.ts
 var import_cosmos = require("@azure/cosmos");
 
@@ -119,7 +126,7 @@ var CosmosRepository = class {
   async getContainer() {
     if (!this.container) {
       const client = getCosmosClient();
-      const database = client.database("yggdrasil-data");
+      const database = client.database(YGGDRASIL_DB);
       const { container } = await database.containers.createIfNotExists({
         id: this.containerName,
         partitionKey: "/tenantId"
@@ -182,7 +189,7 @@ var CosmosRepository = class {
 // src/social/repository.ts
 var FriendRepository = class extends CosmosRepository {
   constructor() {
-    super("friends");
+    super(CONTAINERS.FRIENDS);
   }
   async findByEmail(tenantId, email) {
     const results = await this.query(tenantId, "SELECT * FROM c WHERE c.email = @email", [
@@ -216,9 +223,12 @@ var InteractionSchema = import_zod.z.strictObject({
 });
 var FriendSchema = import_zod.z.strictObject({
   // Infrastructure
-  id: import_zod.z.uuid().min(1, "ID is required"),
+  id: import_zod.z.uuid(),
+  // UUID
   tenantId: import_zod.z.string().min(1, "Tenant ID is required"),
   // Partition Key
+  createdAt: import_zod.z.iso.datetime().optional(),
+  updatedAt: import_zod.z.iso.datetime().optional(),
   // Identity
   name: import_zod.z.string().min(1, "Name is required"),
   email: import_zod.z.email().optional(),

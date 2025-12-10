@@ -1,6 +1,12 @@
 import { CosmosClient } from '@azure/cosmos';
 export { B as BaseEntity, C as CosmosRepository } from '../repository-D9FUt04Y.cjs';
 
+declare const YGGDRASIL_DB = "yggdrasil-data";
+declare const CONTAINERS: {
+    readonly USERS: "users";
+    readonly FRIENDS: "friends";
+};
+
 declare const getCosmosClient: () => CosmosClient;
 
 type LogLevel = "info" | "warn" | "error" | "debug";
@@ -16,4 +22,4 @@ declare const Logger: RunesLogger;
 
 declare const greet: (name: string) => string;
 
-export { type LogLevel, Logger, getCosmosClient, greet };
+export { CONTAINERS, type LogLevel, Logger, YGGDRASIL_DB, getCosmosClient, greet };

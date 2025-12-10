@@ -1,9 +1,10 @@
 import { CosmosRepository } from "../core"
+import { CONTAINERS } from "../core/constants"
 import type { Friend } from "./schemas"
 
 export class FriendRepository extends CosmosRepository<Friend> {
 	constructor() {
-		super("friends")
+		super(CONTAINERS.FRIENDS)
 	}
 
 	async findByEmail(tenantId: string, email: string): Promise<Friend | null> {

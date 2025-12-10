@@ -26,8 +26,10 @@ export const InteractionSchema = z.strictObject({
 
 export const FriendSchema = z.strictObject({
 	// Infrastructure
-	id: z.uuid().min(1, "ID is required"),
+	id: z.uuid(), // UUID
 	tenantId: z.string().min(1, "Tenant ID is required"), // Partition Key
+	createdAt: z.iso.datetime().optional(),
+	updatedAt: z.iso.datetime().optional(),
 
 	// Identity
 	name: z.string().min(1, "Name is required"),
