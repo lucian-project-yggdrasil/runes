@@ -166,6 +166,14 @@ var FriendRepository = class extends CosmosRepository {
     ]);
     return results[0] || null;
   }
+  async logInteraction(friendId, tenantId, interaction) {
+    const container = await this.getContainer();
+    await container.item(friendId, tenantId).patch([
+      // Note: "/interactions/-" appends, "/0" prepends (Reverse Chronological is better for UI)
+      { op: "add", path: "/interactions/0", value: interaction },
+      { op: "add", path: "/lastContactedAt", value: interaction.date }
+    ]);
+  }
 };
 
 // src/social/schemas.ts
@@ -183,11 +191,12 @@ var FrequencySchema = z.enum([
   "ad-hoc"
   // No pressure (Coworkers)
 ]);
+var InteractionTypeSchema = z.enum(["call", "text", "meet", "social", "email"]);
 var InteractionSchema = z.strictObject({
   id: z.uuid(),
   date: z.iso.datetime(),
   // ISO 8601
-  type: z.enum(["call", "text", "meet", "social", "email"]),
+  type: InteractionTypeSchema,
   notes: z.string().optional()
 });
 var RelationshipStatusSchema = z.enum(["healthy", "decaying", "critical", "unknown"]);
@@ -228,6 +237,7 @@ export {
   FriendRepository,
   FriendSchema,
   InteractionSchema,
+  InteractionTypeSchema,
   RelationshipStatusSchema,
   TierSchema,
   UpdateFriendSchema,

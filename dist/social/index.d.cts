@@ -14,6 +14,13 @@ declare const FrequencySchema: z.ZodEnum<{
     yearly: "yearly";
     "ad-hoc": "ad-hoc";
 }>;
+declare const InteractionTypeSchema: z.ZodEnum<{
+    call: "call";
+    text: "text";
+    meet: "meet";
+    social: "social";
+    email: "email";
+}>;
 declare const InteractionSchema: z.ZodObject<{
     id: z.ZodUUID;
     date: z.ZodISODateTime;
@@ -111,9 +118,11 @@ declare const UpdateFriendSchema: z.ZodObject<{
     tags: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
     facts: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
 }, z.core.$strict>;
+type Tier = z.infer<typeof TierSchema>;
 type Frequency = z.infer<typeof FrequencySchema>;
-type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
+type InteractionType = z.infer<typeof InteractionTypeSchema>;
 type Interaction = z.infer<typeof InteractionSchema>;
+type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>;
 type Friend = z.infer<typeof FriendSchema>;
 type CreateFriendDto = z.infer<typeof CreateFriendSchema>;
 type UpdateFriendDto = z.infer<typeof UpdateFriendSchema>;
@@ -126,6 +135,7 @@ declare const getRelationshipStatus: (friend: Friend) => RelationshipStatus;
 declare class FriendRepository extends CosmosRepository<Friend> {
     constructor();
     findByEmail(tenantId: string, email: string): Promise<Friend | null>;
+    logInteraction(friendId: string, tenantId: string, interaction: Interaction): Promise<void>;
 }
 
-export { type CreateFriendDto, CreateFriendSchema, type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type RelationshipStatus, RelationshipStatusSchema, TierSchema, type UpdateFriendDto, UpdateFriendSchema, getRelationshipStatus };
+export { type CreateFriendDto, CreateFriendSchema, type Frequency, FrequencySchema, type Friend, FriendRepository, FriendSchema, type Interaction, InteractionSchema, type InteractionType, InteractionTypeSchema, type RelationshipStatus, RelationshipStatusSchema, type Tier, TierSchema, type UpdateFriendDto, UpdateFriendSchema, getRelationshipStatus };

@@ -25,6 +25,7 @@ __export(social_exports, {
   FriendRepository: () => FriendRepository,
   FriendSchema: () => FriendSchema,
   InteractionSchema: () => InteractionSchema,
+  InteractionTypeSchema: () => InteractionTypeSchema,
   RelationshipStatusSchema: () => RelationshipStatusSchema,
   TierSchema: () => TierSchema,
   UpdateFriendSchema: () => UpdateFriendSchema,
@@ -200,6 +201,14 @@ var FriendRepository = class extends CosmosRepository {
     ]);
     return results[0] || null;
   }
+  async logInteraction(friendId, tenantId, interaction) {
+    const container = await this.getContainer();
+    await container.item(friendId, tenantId).patch([
+      // Note: "/interactions/-" appends, "/0" prepends (Reverse Chronological is better for UI)
+      { op: "add", path: "/interactions/0", value: interaction },
+      { op: "add", path: "/lastContactedAt", value: interaction.date }
+    ]);
+  }
 };
 
 // src/social/schemas.ts
@@ -217,11 +226,12 @@ var FrequencySchema = import_zod.z.enum([
   "ad-hoc"
   // No pressure (Coworkers)
 ]);
+var InteractionTypeSchema = import_zod.z.enum(["call", "text", "meet", "social", "email"]);
 var InteractionSchema = import_zod.z.strictObject({
   id: import_zod.z.uuid(),
   date: import_zod.z.iso.datetime(),
   // ISO 8601
-  type: import_zod.z.enum(["call", "text", "meet", "social", "email"]),
+  type: InteractionTypeSchema,
   notes: import_zod.z.string().optional()
 });
 var RelationshipStatusSchema = import_zod.z.enum(["healthy", "decaying", "critical", "unknown"]);
@@ -263,6 +273,7 @@ var UpdateFriendSchema = CreateFriendSchema.partial();
   FriendRepository,
   FriendSchema,
   InteractionSchema,
+  InteractionTypeSchema,
   RelationshipStatusSchema,
   TierSchema,
   UpdateFriendSchema,

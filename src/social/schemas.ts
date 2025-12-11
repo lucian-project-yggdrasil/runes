@@ -12,10 +12,11 @@ export const FrequencySchema = z.enum([
 	"yearly", // 365 days (Distant)
 	"ad-hoc", // No pressure (Coworkers)
 ])
+export const InteractionTypeSchema = z.enum(["call", "text", "meet", "social", "email"])
 export const InteractionSchema = z.strictObject({
 	id: z.uuid(),
 	date: z.iso.datetime(), // ISO 8601
-	type: z.enum(["call", "text", "meet", "social", "email"]),
+	type: InteractionTypeSchema,
 	notes: z.string().optional(),
 })
 export const RelationshipStatusSchema = z.enum(["healthy", "decaying", "critical", "unknown"])
@@ -69,9 +70,11 @@ export const UpdateFriendSchema = CreateFriendSchema.partial()
 // INFERRED TYPES
 // ========================================
 
+export type Tier = z.infer<typeof TierSchema>
 export type Frequency = z.infer<typeof FrequencySchema>
-export type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>
+export type InteractionType = z.infer<typeof InteractionTypeSchema>
 export type Interaction = z.infer<typeof InteractionSchema>
+export type RelationshipStatus = z.infer<typeof RelationshipStatusSchema>
 
 export type Friend = z.infer<typeof FriendSchema>
 export type CreateFriendDto = z.infer<typeof CreateFriendSchema>
